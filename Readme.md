@@ -1,7 +1,7 @@
 # Проект «Большое путешествие» [![Check status][check-image]][check-url]
 
 * Студент: [Евгений Ворона](https://up.htmlacademy.ru/ecmascript/13/user/167715).
-* Наставник: `Неизвестно`.
+* Наставник: [Артур Галимов](https://htmlacademy.ru/profile/id1237543).
 
 ---
 
