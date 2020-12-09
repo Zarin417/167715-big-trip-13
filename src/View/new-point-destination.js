@@ -1,15 +1,23 @@
-export const createNewPointDestination = () => {
+export const createNewPointDestination = (data) => {
+  const {description, photos} = data;
+
+  const addPhotos = () => {
+    let photosList = ``;
+
+    for (let i = 0; i < photos.length; i++) {
+      photosList += `<img class="event__photo" src="${photos[i]}" alt="Event photo">`;
+    }
+
+    return `<div class="event__photos-container">
+              <div class="event__photos-tape">
+                ${photosList}
+              </div>
+            </div>`;
+  };
+
   return `<section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">Geneva is a city in Switzerland that lies at the southern tip of expansive Lac Léman (Lake Geneva). Surrounded by the Alps and Jura mountains, the city has views of dramatic Mont Blanc.</p>
-            <div class="event__photos-container">
-              <div class="event__photos-tape">
-                <img class="event__photo" src="img/photos/1.jpg" alt="Event photo">
-                <img class="event__photo" src="img/photos/2.jpg" alt="Event photo">
-                <img class="event__photo" src="img/photos/3.jpg" alt="Event photo">
-                <img class="event__photo" src="img/photos/4.jpg" alt="Event photo">
-                <img class="event__photo" src="img/photos/5.jpg" alt="Event photo">
-              </div>
-            </div>
+            <p class="event__destination-description">${description}</p>
+            ${addPhotos()}
           </section>`;
 };
