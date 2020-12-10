@@ -9,40 +9,44 @@ import {createTripEventItemTemplate} from "./View/event-item";
 import {createNewPointTemplate} from "./View/new-point";
 import {createNewPointOffersTemplate} from "./View/new-point-offers";
 import {createNewPointDestination} from "./View/new-point-destination";
+import {renderTemplate, RenderPosition} from "./util";
+import {generatePoint} from "./mock/trip-point";
 
-const render = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
+const POINTS_AMOUNT = 20;
+const points = new Array(POINTS_AMOUNT).fill(undefined).map(generatePoint).sort((a, b) => {
+  return new Date(a.date) - new Date(b.date);
+});
 
 const pageHeaderMain = document.querySelector(`.trip-main`);
 const pageHeaderNav = pageHeaderMain.querySelector(`.trip-controls`);
 const pageHeaderNavMenuTitle = pageHeaderNav.querySelector(`h2:first-child`);
 
-render(pageHeaderNavMenuTitle, createSiteMenuTemplate(), `afterend`);
-render(pageHeaderNav, createSiteFiltersTemplate(), `beforeend`);
-render(pageHeaderMain, createTripInfoTemplate(), `afterbegin`);
+renderTemplate(pageHeaderNavMenuTitle, createSiteMenuTemplate(), RenderPosition.AFTER_END);
+renderTemplate(pageHeaderNav, createSiteFiltersTemplate(), RenderPosition.BEFORE_END);
+renderTemplate(pageHeaderMain, createTripInfoTemplate(points), RenderPosition.AFTER_BEGIN);
 
 const pageHeaderTripInfo = pageHeaderMain.querySelector(`.trip-info`);
 
-render(pageHeaderTripInfo, createTripCostTemplate(), `beforeend`);
+renderTemplate(pageHeaderTripInfo, createTripCostTemplate(points), RenderPosition.BEFORE_END);
 
 const pageMainTripEvents = document.querySelector(`.trip-events`);
 const pageMainTripEventsTittle = pageMainTripEvents.querySelector(`h2:first-child`);
 
-render(pageMainTripEventsTittle, createSortListTemplate(), `afterend`);
-render(pageMainTripEvents, createTripEventsListTemplate(), `beforeend`);
+renderTemplate(pageMainTripEventsTittle, createSortListTemplate(), RenderPosition.AFTER_END);
+renderTemplate(pageMainTripEvents, createTripEventsListTemplate(), RenderPosition.BEFORE_END);
 
 const tripEventsList = pageMainTripEvents.querySelector(`.trip-events__list`);
-let counter = 0;
 
-while (counter < 3) {
-  render(tripEventsList, createTripEventItemTemplate(), `beforeend`);
-  counter++;
+for (let i = 1; i < POINTS_AMOUNT; i++) {
+  renderTemplate(tripEventsList, createTripEventItemTemplate(points[i]), RenderPosition.BEFORE_END);
 }
 
-render(tripEventsList, createNewPointTemplate(), `afterbegin`);
+renderTemplate(tripEventsList, createNewPointTemplate(points[0]), RenderPosition.AFTER_BEGIN);
 
 const newTripEventDetails = tripEventsList.querySelector(`.event__details`);
 
-render(newTripEventDetails, createNewPointOffersTemplate(), `afterbegin`);
-render(newTripEventDetails, createNewPointDestination(), `beforeend`);
+if (points[0].offers.length !== 0) {
+  renderTemplate(newTripEventDetails, createNewPointOffersTemplate(points[0]), RenderPosition.AFTER_BEGIN);
+}
+
+renderTemplate(newTripEventDetails, createNewPointDestination(points[0]), RenderPosition.BEFORE_END);
