@@ -1,9 +1,10 @@
 import dayjs from "dayjs";
+import {createElement} from "../utils";
 
-export const createTripInfoTemplate = (data) => {
+const createTripInfoTemplate = (pointsData) => {
 
   const addTripRout = () => {
-    const destinations = data.map((point) => {
+    const destinations = pointsData.map((point) => {
       return point.destination;
     });
 
@@ -16,8 +17,8 @@ export const createTripInfoTemplate = (data) => {
 
   const addTripPeriod = () => {
     let tripPeriod = ``;
-    const startDay = dayjs(data[0].startTime).format(`MMM DD`);
-    const endDay = dayjs(data[data.length - 1].endTime).format(`MMM DD`);
+    const startDay = dayjs(pointsData[0].startTime).format(`MMM DD`);
+    const endDay = dayjs(pointsData[pointsData.length - 1].endTime).format(`MMM DD`);
 
     if (startDay.slice(0, 4) !== endDay.slice(0, 4)) {
       tripPeriod = `${startDay} &mdash; ${endDay}`;
@@ -36,3 +37,26 @@ export const createTripInfoTemplate = (data) => {
             </div>
           </section>`;
 };
+
+export default class TripInfoView {
+  constructor(data) {
+    this._pointsData = data;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createTripInfoTemplate(this._pointsData);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

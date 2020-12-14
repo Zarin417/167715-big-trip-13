@@ -1,16 +1,16 @@
 import {createElement} from "../utils";
 
-const createEmptyEventsListTemplate = () => {
-  return `<p class="trip-events__msg">Click New Event to create your first point</p>`;
+const createLoadingTemplate = () => {
+  return `<p class="trip-events__msg">Loading...</p>`;
 };
 
-export default class EmptyEventsListView {
+export default class LoadingView {
   constructor() {
     this._element = null;
   }
 
   getTemplate() {
-    return createEmptyEventsListTemplate();
+    return createLoadingTemplate();
   }
 
   getElement() {

@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
+import {createElement} from "../utils";
 
-export const createTripEventItemTemplate = (data) => {
+const createEventItemTemplate = (data) => {
   const {date, type, destination, startTime, endTime, price, isFavorite, offers} = data;
 
   const getEventTimeDuration = () => {
@@ -90,3 +91,26 @@ export const createTripEventItemTemplate = (data) => {
             </div>
           </li>`;
 };
+
+export default class EventItemView {
+  constructor(data) {
+    this._pointData = data;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createEventItemTemplate(this._pointData);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

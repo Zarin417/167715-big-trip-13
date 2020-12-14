@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import {getRandomInteger} from "../util";
+import {getRandomInteger} from "../utils";
 import {EVENT_TYPES, EVENT_DESTINATIONS, OFFERS} from "./const";
 
 const generateRandomPointType = () => {
