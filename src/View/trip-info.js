@@ -8,11 +8,15 @@ const createTripInfoTemplate = (pointsData) => {
       return point.destination;
     });
 
-    const tripRout = destinations.filter((element, index) => {
-      return element !== destinations[index - 1];
-    });
+    let tripRout = [];
 
-    return tripRout.join(` &mdash; `);
+    if (destinations.length === 1) {
+      return tripRout.push(destinations[0]);
+    } else {
+      tripRout.push(destinations[0]);
+      tripRout.push(destinations[destinations.length - 1]);
+      return tripRout.join(` &mdash; `);
+    }
   };
 
   const addTripPeriod = () => {
