@@ -1,12 +1,13 @@
 import dayjs from "dayjs";
-import {createElement} from "../utils";
+import AbstractView from "./abstract";
+
+const MINUTES_IN_HOUR = 60;
+const MINUTES_IN_DAY = 1440;
 
 const createEventItemTemplate = (data) => {
   const {date, type, destination, startTime, endTime, price, isFavorite, offers} = data;
 
   const getEventTimeDuration = () => {
-    const MINUTES_IN_HOUR = 60;
-    const MINUTES_IN_DAY = 1440;
     const durationInMinutes = dayjs(endTime).diff(dayjs(startTime), `minute`);
     let durationDays;
     let durationHours;
@@ -92,25 +93,24 @@ const createEventItemTemplate = (data) => {
           </li>`;
 };
 
-export default class EventItemView {
+export default class EventItemView extends AbstractView {
   constructor(data) {
+    super();
     this._pointData = data;
-    this._element = null;
+    this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
   }
 
   getTemplate() {
     return createEventItemTemplate(this._pointData);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _rollupBtnClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.rollupBtnClick();
   }
 
-  removeElement() {
-    this._element = null;
+  setRollupBtnClickHandler(callback) {
+    this._callback.rollupBtnClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
   }
 }
