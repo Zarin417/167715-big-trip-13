@@ -7,7 +7,7 @@ import TripEventsListView from "./View/events-list";
 import EventItemView from "./View/events-item";
 import EmptyEventsListView from "./View/empty-events-list";
 import PointEditView from "./View/point-edit";
-import {render, RenderPosition} from "./utils";
+import {render, RenderPosition, replace} from "./Utils/render";
 import {generatePoint} from "./mock/trip-point";
 
 const POINTS_AMOUNT = 20;
@@ -28,11 +28,11 @@ const renderEventItem = (container, pointData) => {
   const pointEditComponent = new PointEditView(pointData, true);
 
   const replacePointToEdit = () => {
-    container.replaceChild(pointEditComponent.getElement(), pointComponent.getElement());
+    replace(pointEditComponent, pointComponent);
   };
 
   const replaceEditToPoint = () => {
-    container.replaceChild(pointComponent.getElement(), pointEditComponent.getElement());
+    replace(pointComponent, pointEditComponent);
   };
 
   const onEscKeyDown = (evt) => {
@@ -43,37 +43,36 @@ const renderEventItem = (container, pointData) => {
     }
   };
 
-  pointComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+  pointComponent.setRollupBtnClickHandler(() => {
     replacePointToEdit();
     document.addEventListener(`keydown`, onEscKeyDown);
   });
 
-  pointEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
-    evt.preventDefault();
+  pointEditComponent.setFormSubmitHandler(() => {
     replaceEditToPoint();
     document.removeEventListener(`keydown`, onEscKeyDown);
   });
 
-  pointEditComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+  pointEditComponent.setRollupBtnClickHandler(() => {
     replaceEditToPoint();
     document.removeEventListener(`keydown`, onEscKeyDown);
   });
 
-  render(container, pointComponent.getElement(), RenderPosition.BEFORE_END);
+  render(container, pointComponent, RenderPosition.BEFORE_END);
 };
 
-render(pageHeaderNavMenuTitle, new SiteMenuView().getElement(), RenderPosition.AFTER_END);
-render(pageHeaderNav, new SiteFiltersView().getElement(), RenderPosition.BEFORE_END);
+render(pageHeaderNavMenuTitle, new SiteMenuView(), RenderPosition.AFTER_END);
+render(pageHeaderNav, new SiteFiltersView(), RenderPosition.BEFORE_END);
 
 if (points.length === 0) {
-  render(pageMainTripEventsTittle, new EmptyEventsListView().getElement(), RenderPosition.AFTER_END);
+  render(pageMainTripEventsTittle, new EmptyEventsListView(), RenderPosition.AFTER_END);
 } else {
-  render(pageHeaderMain, tripInfoComponent.getElement(), RenderPosition.AFTER_BEGIN);
-  render(tripInfoComponent.getElement(), new TripCostView(points).getElement(), RenderPosition.BEFORE_END);
-  render(pageMainTripEventsTittle, new SortListView().getElement(), RenderPosition.AFTER_END);
-  render(pageMainTripEvents, tripEventsListComponent.getElement(), RenderPosition.BEFORE_END);
+  render(pageHeaderMain, tripInfoComponent, RenderPosition.AFTER_BEGIN);
+  render(tripInfoComponent, new TripCostView(points), RenderPosition.BEFORE_END);
+  render(pageMainTripEventsTittle, new SortListView(), RenderPosition.AFTER_END);
+  render(pageMainTripEvents, tripEventsListComponent, RenderPosition.BEFORE_END);
 
   for (let i = 0; i < POINTS_AMOUNT; i++) {
-    renderEventItem(tripEventsListComponent.getElement(), points[i]);
+    renderEventItem(tripEventsListComponent, points[i]);
   }
 }
