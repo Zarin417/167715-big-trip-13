@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
-import {getRandomInteger} from "../Utils/common";
+import {nanoid} from "nanoid";
+import {getRandomInteger} from "../utils/common";
 import {EVENT_TYPES, EVENT_DESTINATIONS, OFFERS} from "./const";
 
 const generateRandomPointType = () => {
@@ -104,6 +105,7 @@ export const generatePoint = () => {
   const date = generateDate();
 
   return {
+    id: nanoid(),
     date,
     type: generateRandomPointType(),
     destination: generateRandomPointDestination(),
