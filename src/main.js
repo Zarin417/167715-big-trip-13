@@ -5,9 +5,7 @@ import {render, RenderPosition} from "./utils/render";
 import {generatePoint} from "./mock/trip-point";
 
 const POINTS_AMOUNT = 20;
-const points = new Array(POINTS_AMOUNT).fill(undefined).map(generatePoint).sort((a, b) => {
-  return new Date(a.date) - new Date(b.date);
-});
+const points = new Array(POINTS_AMOUNT).fill(undefined).map(generatePoint);
 
 const pageHeaderMain = document.querySelector(`.trip-main`);
 const pageHeaderNav = pageHeaderMain.querySelector(`.trip-controls`);
