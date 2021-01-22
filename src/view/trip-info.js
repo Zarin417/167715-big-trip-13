@@ -11,11 +11,15 @@ const createTripInfoTemplate = (pointsData) => {
     let tripRout = [];
 
     if (destinations.length === 1) {
-      return tripRout.push(destinations[0]);
+      tripRout = [...destinations];
+      return tripRout;
+    } else if (destinations.length === 2) {
+      tripRout = [...destinations];
+      return tripRout.join(` &mdash; `);
     } else {
       tripRout.push(destinations[0]);
       tripRout.push(destinations[destinations.length - 1]);
-      return tripRout.join(` &mdash; `);
+      return tripRout.join(` &mdash; ... &mdash; `);
     }
   };
 

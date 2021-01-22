@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import {EVENT_TYPES, EVENT_DESTINATIONS} from "../mock/const";
-import AbstractView from "./abstract";
+import SmartView from "./smart";
 
 // edit = true - for edit point, false - for new point
 const createPointTemplate = (pointData, edit) => {
@@ -142,22 +142,52 @@ const createPointTemplate = (pointData, edit) => {
           </li>`;
 };
 
-export default class PointEditView extends AbstractView {
-  constructor(data, edit) {
+export default class PointEditView extends SmartView {
+  constructor(pointData, isEdit) {
     super();
-    this._pointData = data;
-    this._isEdit = edit;
+    this._data = PointEditView.parsePointToCondition(pointData);
+    this._isEdit = isEdit;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
+    this._typeOptionsChangeHandler = this._typeOptionsChangeHandler.bind(this);
+
+    this._setInnerHandlers();
+  }
+
+  static parsePointToCondition(pointData) {
+    return Object.assign(
+        {},
+        pointData,
+        {}
+    );
+  }
+
+  static parseConditionToPoint(data) {
+    let pointData = Object.assign({}, data);
+
+    return pointData;
+  }
+
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setRollupBtnClickHandler(this._callback.rollupBtnClick);
   }
 
   getTemplate() {
-    return createPointTemplate(this._pointData, this._isEdit);
+    return createPointTemplate(this._data, this._isEdit);
   }
+
+  _setInnerHandlers() {
+    this.getElement()
+      .querySelector(`.event__type-list`)
+      .addEventListener(`change`, this._typeOptionsChangeHandler);
+  }
+
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit(this._pointData);
+    this._callback.formSubmit(this._data);
   }
 
   setFormSubmitHandler(callback) {
@@ -173,5 +203,12 @@ export default class PointEditView extends AbstractView {
   setRollupBtnClickHandler(callback) {
     this._callback.rollupBtnClick = callback;
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
+  }
+
+  _typeOptionsChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      type: evt.target.value
+    });
   }
 }
