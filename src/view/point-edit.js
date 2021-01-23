@@ -2,6 +2,8 @@ import dayjs from "dayjs";
 import {EVENT_TYPES, EVENT_DESTINATIONS} from "../mock/const";
 import {getOffersByType} from "../mock/trip-point";
 import SmartView from "./smart";
+import flatpickr from "flatpickr";
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 // edit = true - for edit point, false - for new point
 const createPointEditTemplate = (pointData, edit) => {
@@ -155,13 +157,20 @@ export default class PointEditView extends SmartView {
     this._data = PointEditView.parsePointToData(pointData);
     this._isEdit = isEdit;
     this._destinations = destinations;
+    this._datePickerStartDate = null;
+    this._datePickerEndDate = null;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
     this._typeOptionsChangeHandler = this._typeOptionsChangeHandler.bind(this);
     this._destinationInputChangeHandler = this._destinationInputChangeHandler.bind(this);
     this._destinationInputFocusHandler = this._destinationInputFocusHandler.bind(this);
+    this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
+    this._priceInputChangeHandler = this._priceInputChangeHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setDatepickerStartDate();
+    this._setDatepickerEndDate();
   }
 
   static parsePointToData(pointData) {
@@ -182,6 +191,8 @@ export default class PointEditView extends SmartView {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setRollupBtnClickHandler(this._callback.rollupBtnClick);
+    this._setDatepickerStartDate();
+    this._setDatepickerEndDate();
   }
 
   getTemplate() {
@@ -200,6 +211,10 @@ export default class PointEditView extends SmartView {
     this.getElement()
       .querySelector(`.event__input--destination`)
       .addEventListener(`focus`, this._destinationInputFocusHandler);
+
+    this.getElement()
+      .querySelector(`.event__input--price`)
+      .addEventListener(`input`, this._priceInputChangeHandler);
   }
 
 
@@ -243,5 +258,67 @@ export default class PointEditView extends SmartView {
 
   _destinationInputFocusHandler(evt) {
     evt.target.value = ``;
+  }
+
+  _setDatepickerStartDate() {
+    if (this._datePickerStartDate) {
+      this._datePickerStartDate.destroy();
+      this._datePickerStartDate = null;
+    }
+
+    this._datePickerStartDate = flatpickr(
+        this.getElement().querySelector(`#event-start-time-1`),
+        {
+          enableTime: true,
+          dateFormat: `d/m/Y H:i`,
+          defaultDate: this._data.startTime,
+          onChange: this._startDateChangeHandler
+        }
+    );
+  }
+
+  _startDateChangeHandler(userDate) {
+    if (dayjs(userDate).toDate() > dayjs(this._datePickerEndDate.selectedDates).toDate()) {
+      this.updateData({
+        startTime: dayjs(userDate).toDate(),
+        endTime: dayjs(userDate).toDate()
+      });
+    } else {
+      this.updateData({
+        date: dayjs(userDate).toDate(),
+        startTime: dayjs(userDate).toDate()
+      });
+    }
+  }
+
+  _setDatepickerEndDate() {
+    if (this._datePickerEndDate) {
+      this._datePickerEndDate.destroy();
+      this._datePickerEndDate = null;
+    }
+
+    this._datePickerEndDate = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        {
+          enableTime: true,
+          minDate: dayjs(this._data.startTime).valueOf(),
+          dateFormat: `d/m/Y H:i`,
+          defaultDate: this._data.endTime,
+          onChange: this._endDateChangeHandler
+        }
+    );
+  }
+
+  _endDateChangeHandler(userDate) {
+    this.updateData({
+      endTime: dayjs(userDate).toDate()
+    });
+  }
+
+  _priceInputChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      price: evt.target.value
+    }, true);
   }
 }
