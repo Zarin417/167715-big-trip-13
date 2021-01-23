@@ -1,6 +1,6 @@
 import SortListView from "../view/sort-list";
-import TripEventsListView from "../view/events-list";
-import EmptyEventsListView from "../view/empty-events-list";
+import TripListView from "../view/trip-list";
+import EmptyTripListView from "../view/empty-trip-list";
 import TripInfoView from "../view/trip-info";
 import TripCostView from "../view/trip-cost";
 import PointPresenter from "./point";
@@ -19,8 +19,8 @@ export default class Trip {
     this._tripInfoComponent = null;
     this._tripCostComponent = null;
     this._sortComponent = new SortListView();
-    this._tripListComponent = new TripEventsListView();
-    this._emptyTripListComponent = new EmptyEventsListView();
+    this._tripListComponent = new TripListView();
+    this._emptyTripListComponent = new EmptyTripListView();
 
     this._handlePointChange = this._handlePointChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);

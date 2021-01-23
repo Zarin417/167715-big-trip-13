@@ -1,9 +1,10 @@
 import dayjs from "dayjs";
 import {EVENT_TYPES, EVENT_DESTINATIONS} from "../mock/const";
-import AbstractView from "./abstract";
+import {getOffersByType} from "../mock/trip-point";
+import SmartView from "./smart";
 
 // edit = true - for edit point, false - for new point
-const createPointTemplate = (pointData, edit) => {
+const createPointEditTemplate = (pointData, edit) => {
   const {type, destination, startTime, endTime, price, offers, description, photos} = pointData;
   const isEdit = edit;
 
@@ -45,14 +46,20 @@ const createPointTemplate = (pointData, edit) => {
   const addEventOffers = () => {
     let eventOffers = ``;
 
-    if (offers.length !== 0) {
-      offers.forEach((offer) => {
+    if (offers !== {}) {
+      Object.keys(offers).forEach((key) => {
+        let checked = ``;
+
+        if (offers[key].checked) {
+          checked = `checked`;
+        }
+
         eventOffers += `<div class="event__offer-selector">
-                          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.name}-1" type="checkbox" name="event-offer-${offer.name}">
-                          <label class="event__offer-label" for="event-offer-${offer.name}-1">
-                            <span class="event__offer-title">${offer.description}</span>
+                          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offers[key].name}-1" type="checkbox" name="event-offer-${offers[key].name} ${checked}">
+                          <label class="event__offer-label" for="event-offer-${offers[key].name}-1">
+                            <span class="event__offer-title">${offers[key].description}</span>
                               &plus;&euro;&nbsp;
-                            <span class="event__offer-price">${offer.price}</span>
+                            <span class="event__offer-price">${offers[key].price}</span>
                           </label>
                         </div>`;
       });
@@ -142,22 +149,63 @@ const createPointTemplate = (pointData, edit) => {
           </li>`;
 };
 
-export default class PointEditView extends AbstractView {
-  constructor(data, edit) {
+export default class PointEditView extends SmartView {
+  constructor(pointData, destinations, isEdit) {
     super();
-    this._pointData = data;
-    this._isEdit = edit;
+    this._data = PointEditView.parsePointToData(pointData);
+    this._isEdit = isEdit;
+    this._destinations = destinations;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
+    this._typeOptionsChangeHandler = this._typeOptionsChangeHandler.bind(this);
+    this._destinationInputChangeHandler = this._destinationInputChangeHandler.bind(this);
+    this._destinationInputFocusHandler = this._destinationInputFocusHandler.bind(this);
+
+    this._setInnerHandlers();
+  }
+
+  static parsePointToData(pointData) {
+    return Object.assign(
+        {},
+        pointData,
+        {}
+    );
+  }
+
+  static parseDataToPoint(data) {
+    let pointData = Object.assign({}, data);
+
+    return pointData;
+  }
+
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setRollupBtnClickHandler(this._callback.rollupBtnClick);
   }
 
   getTemplate() {
-    return createPointTemplate(this._pointData, this._isEdit);
+    return createPointEditTemplate(this._data, this._isEdit);
   }
+
+  _setInnerHandlers() {
+    this.getElement()
+      .querySelector(`.event__type-list`)
+      .addEventListener(`change`, this._typeOptionsChangeHandler);
+
+    this.getElement()
+      .querySelector(`.event__input--destination`)
+      .addEventListener(`change`, this._destinationInputChangeHandler);
+
+    this.getElement()
+      .querySelector(`.event__input--destination`)
+      .addEventListener(`focus`, this._destinationInputFocusHandler);
+  }
+
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit(this._pointData);
+    this._callback.formSubmit(this._data);
   }
 
   setFormSubmitHandler(callback) {
@@ -173,5 +221,27 @@ export default class PointEditView extends AbstractView {
   setRollupBtnClickHandler(callback) {
     this._callback.rollupBtnClick = callback;
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
+  }
+
+  _typeOptionsChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      type: evt.target.value,
+      offers: getOffersByType(evt.target.value)
+    });
+  }
+
+  _destinationInputChangeHandler(evt) {
+    const destination = this._destinations[evt.target.value];
+
+    this.updateData({
+      destination: destination.name,
+      description: destination.description,
+      photos: destination.photos
+    });
+  }
+
+  _destinationInputFocusHandler(evt) {
+    evt.target.value = ``;
   }
 }

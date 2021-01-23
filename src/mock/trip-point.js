@@ -1,18 +1,12 @@
 import dayjs from "dayjs";
 import {nanoid} from "nanoid";
 import {getRandomInteger} from "../utils/common";
-import {EVENT_TYPES, EVENT_DESTINATIONS, OFFERS} from "./const";
+import {EVENT_TYPES} from "./const";
 
 const generateRandomPointType = () => {
   const randomIndex = getRandomInteger(0, EVENT_TYPES.length - 1);
 
   return EVENT_TYPES[randomIndex];
-};
-
-const generateRandomPointDestination = () => {
-  const randomIndex = getRandomInteger(0, EVENT_DESTINATIONS.length - 1);
-
-  return EVENT_DESTINATIONS[randomIndex];
 };
 
 const generateRandomDescription = () => {
@@ -73,26 +67,6 @@ const generateEndTime = (date) => {
   return dayjs(date).add(minutesGap, `minute`).toDate();
 };
 
-const generateRandomOffers = () => {
-  const MIN_OFFERS = 0;
-  const MAX_OFFERS = 5;
-  const offersAmount = getRandomInteger(MIN_OFFERS, MAX_OFFERS);
-  let offers = [];
-
-  if (offersAmount) {
-    for (let i = 0; i < offersAmount;) {
-      const randomIndex = getRandomInteger(MIN_OFFERS, OFFERS.length - 1);
-
-      if (!offers.includes(OFFERS[randomIndex])) {
-        offers.push(OFFERS[randomIndex]);
-        i++;
-      }
-    }
-  }
-
-  return offers;
-};
-
 const generatePrice = () => {
   const MIN_PRICE = 2;
   const MAX_PRICE = 60;
@@ -101,20 +75,138 @@ const generatePrice = () => {
   return getRandomInteger(MIN_PRICE, MAX_PRICE) * PRICE_MULTIPLICITY;
 };
 
+export const destinations = {
+  Amsterdam: {
+    name: `Amsterdam`,
+    description: generateRandomDescription(),
+    photos: generateRandomPhotos()
+  },
+  Chamonix: {
+    name: `Chamonix`,
+    description: generateRandomDescription(),
+    photos: generateRandomPhotos()
+  },
+  Geneva: {
+    name: `Geneva`,
+    description: generateRandomDescription(),
+    photos: generateRandomPhotos()
+  },
+  Kyiv: {
+    name: `Kyiv`,
+    description: generateRandomDescription(),
+    photos: generateRandomPhotos()
+  },
+  Stambul: {
+    name: `Stambul`,
+    description: generateRandomDescription(),
+    photos: generateRandomPhotos()
+  }
+};
+
+const getRandomDestination = (obj) => {
+  const keys = Object.keys(obj);
+  return obj[keys[getRandomInteger(0, keys.length - 1)]];
+};
+
+export const offers = {
+  luggage: {
+    name: `luggage`,
+    description: `Add luggage`,
+    category: [`taxi`, `bus`, `train`, `ship`, `flight`],
+    price: 50,
+    checked: Boolean(getRandomInteger())
+  },
+  uber: {
+    name: `uber`,
+    description: `Order Uber`,
+    category: [`taxi`, `transport`],
+    price: 20,
+    checked: Boolean(getRandomInteger())
+  },
+  comfort: {
+    name: `comfort`,
+    description: `Switch to comfort`,
+    category: [`taxi`, `bus`, `train`, `ship`, `flight`, `check-in`],
+    price: 80,
+    checked: Boolean(getRandomInteger())
+  },
+  car: {
+    name: `car`,
+    description: `Rent a car`,
+    category: [`transport`, `drive`],
+    price: 200,
+    checked: Boolean(getRandomInteger())
+  },
+  breakfast: {
+    name: `breakfast`,
+    description: `Add breakfast`,
+    category: [`train`, `ship`, `flight`, `check-in`, `restaurant`],
+    price: 50,
+    checked: Boolean(getRandomInteger())
+  },
+  tickets: {
+    name: `tickets`,
+    description: `Book tickets`,
+    category: [`sightseeing`],
+    price: 40,
+    checked: Boolean(getRandomInteger())
+  },
+  lunch: {
+    name: `lunch`,
+    description: `Lunch in city`,
+    category: [`train`, `ship`, `flight`, `check-in`, `restaurant`],
+    price: 30,
+    checked: Boolean(getRandomInteger())
+  },
+  meal: {
+    name: `meal`,
+    description: `Add meal`,
+    category: [`check-in`, `sightseeing`, `restaurant`],
+    price: 15,
+    checked: Boolean(getRandomInteger())
+  },
+  seats: {
+    name: `seats`,
+    description: `Choose seats`,
+    category: [`bus`, `train`, `ship`, `flight`, `check-in`, `sightseeing`, `restaurant`],
+    price: 5,
+    checked: Boolean(getRandomInteger())
+  },
+  train: {
+    name: `train`,
+    description: `Travel by train`,
+    category: [`transport`],
+    price: 40,
+    checked: Boolean(getRandomInteger())
+  }
+};
+
+export const getOffersByType = (type) => {
+  const offersByType = {};
+  for (const [offerType, offerInfo] of Object.entries(offers)) {
+    if (offerInfo.category.includes(type.toLowerCase())) {
+      offersByType[offerType] = offerInfo;
+    }
+  }
+  return offersByType;
+};
+
 export const generatePoint = () => {
+  const type = generateRandomPointType();
+  const destination = getRandomDestination(destinations);
   const date = generateDate();
 
   return {
     id: nanoid(),
     date,
-    type: generateRandomPointType(),
-    destination: generateRandomPointDestination(),
-    description: generateRandomDescription(),
-    photos: generateRandomPhotos(),
+    type,
+    destination: destination.name,
+    description: destination.description,
+    photos: destination.photos,
     startTime: date,
     endTime: generateEndTime(date),
     price: generatePrice(),
     isFavorite: Boolean(getRandomInteger()),
-    offers: generateRandomOffers()
+    offers: getOffersByType(type)
   };
 };
