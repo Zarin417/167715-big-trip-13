@@ -1,6 +1,7 @@
 import PointView from "../view/point";
 import PointEditView from "../view/point-edit";
 import {render, RenderPosition, replace, remove} from "../utils/render";
+import {destinations} from "../mock/trip-point";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -31,7 +32,7 @@ export default class Point {
     const prevPointEditComponent = this._pointEditComponent;
 
     this._pointComponent = new PointView(point);
-    this._pointEditComponent = new PointEditView(point, true);
+    this._pointEditComponent = new PointEditView(point, destinations, true);
 
     this._pointComponent.setRollupBtnClickHandler(this._handlePointRollupBtnClick);
     this._pointComponent.setFavoriteClickHandler(this._handleFavoriteClick);

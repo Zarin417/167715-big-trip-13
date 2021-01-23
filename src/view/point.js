@@ -41,15 +41,17 @@ const createEventItemTemplate = (data) => {
   const favoriteClassName = isFavorite ? `event__favorite-btn--active` : ``;
 
   const renderOffers = () => {
-    if (offers !== []) {
+    if (offers !== {}) {
       let offersItems = ``;
 
-      offers.forEach((offer) => {
-        offersItems += `<li class="event__offer">
-                        <span class="event__offer-title">${offer.description}</span>
-                        &plus;&euro;&nbsp;
-                        <span class="event__offer-price">${offer.price}</span>
-                    </li>`;
+      Object.keys(offers).forEach((key) => {
+        if (offers[key].checked) {
+          offersItems += `<li class="event__offer">
+                           <span class="event__offer-title">${offers[key].description}</span>
+                             &plus;&euro;&nbsp;
+                           <span class="event__offer-price">${offers[key].price}</span>
+                          </li>`;
+        }
       });
 
       return `<h4 class="visually-hidden">Offers:</h4>

@@ -5,11 +5,14 @@ const createTripCostTemplate = (pointsData) => {
     let tripCost = 0;
 
     for (let point of pointsData) {
+      let offers = point.offers;
       tripCost += point.price;
 
-      for (let offer of point.offers) {
-        tripCost += offer.price;
-      }
+      Object.keys(offers).forEach((key) => {
+        if (offers[key].checked) {
+          tripCost += offers[key].price;
+        }
+      });
     }
 
     return tripCost;
