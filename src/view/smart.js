@@ -6,7 +6,7 @@ export default class Smart extends AbstractView {
     this._condition = {};
   }
 
-  updateData(update, justConditionUpdate) {
+  updateData(update, justDataUpdate) {
     if (!update) {
       return;
     }
@@ -17,7 +17,7 @@ export default class Smart extends AbstractView {
         update
     );
 
-    if (justConditionUpdate) {
+    if (justDataUpdate) {
       return;
     }
 
