@@ -173,18 +173,13 @@ export default class PointEditView extends SmartView {
     this._setDatepickerEndDate();
   }
 
-  static parsePointToData(pointData) {
-    return Object.assign(
-        {},
-        pointData,
-        {}
-    );
+  getTemplate() {
+    return createPointEditTemplate(this._data, this._isEdit);
   }
 
-  static parseDataToPoint(data) {
-    let pointData = Object.assign({}, data);
-
-    return pointData;
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
   }
 
   restoreHandlers() {
@@ -195,8 +190,9 @@ export default class PointEditView extends SmartView {
     this._setDatepickerEndDate();
   }
 
-  getTemplate() {
-    return createPointEditTemplate(this._data, this._isEdit);
+  setRollupBtnClickHandler(callback) {
+    this._callback.rollupBtnClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
   }
 
   _setInnerHandlers() {
@@ -217,25 +213,14 @@ export default class PointEditView extends SmartView {
       .addEventListener(`input`, this._priceInputChangeHandler);
   }
 
-
   _formSubmitHandler(evt) {
     evt.preventDefault();
     this._callback.formSubmit(this._data);
   }
 
-  setFormSubmitHandler(callback) {
-    this._callback.formSubmit = callback;
-    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
-  }
-
   _rollupBtnClickHandler(evt) {
     evt.preventDefault();
     this._callback.rollupBtnClick();
-  }
-
-  setRollupBtnClickHandler(callback) {
-    this._callback.rollupBtnClick = callback;
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
   }
 
   _typeOptionsChangeHandler(evt) {
@@ -320,5 +305,15 @@ export default class PointEditView extends SmartView {
     this.updateData({
       price: evt.target.value
     }, true);
+  }
+
+  static parsePointToData(pointData) {
+    return Object.assign({}, pointData,{});
+  }
+
+  static parseDataToPoint(data) {
+    let pointData = Object.assign({}, data);
+
+    return pointData;
   }
 }

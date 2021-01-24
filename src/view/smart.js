@@ -3,7 +3,7 @@ import AbstractView from "./abstract";
 export default class Smart extends AbstractView {
   constructor() {
     super();
-    this._condition = {};
+    this._data = {};
   }
 
   updateData(update, justDataUpdate) {
