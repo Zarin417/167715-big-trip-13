@@ -49,14 +49,15 @@ const createPointEditTemplate = (pointData, edit) => {
     let eventOffers = ``;
 
     if (offers !== {}) {
-      Object.keys(offers).forEach((key) => {
-        let checked = ``;
+      for (let key in offers) {
+        if (offers) {
+          let checked = ``;
 
-        if (offers[key].checked) {
-          checked = `checked`;
-        }
+          if (offers[key].checked) {
+            checked = `checked`;
+          }
 
-        eventOffers += `<div class="event__offer-selector">
+          eventOffers += `<div class="event__offer-selector">
                           <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offers[key].name}-1" type="checkbox" name="event-offer-${offers[key].name} ${checked}">
                           <label class="event__offer-label" for="event-offer-${offers[key].name}-1">
                             <span class="event__offer-title">${offers[key].description}</span>
@@ -64,7 +65,8 @@ const createPointEditTemplate = (pointData, edit) => {
                             <span class="event__offer-price">${offers[key].price}</span>
                           </label>
                         </div>`;
-      });
+        }
+      }
 
       return `<section class="event__section  event__section--offers">
               <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -136,7 +138,7 @@ const createPointEditTemplate = (pointData, edit) => {
                     <span class="visually-hidden">Price</span>
                     &euro;
                   </label>
-                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+                  <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price}">
                 </div>
 
                 <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -160,6 +162,7 @@ export default class PointEditView extends SmartView {
     this._datePickerStartDate = null;
     this._datePickerEndDate = null;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
     this._typeOptionsChangeHandler = this._typeOptionsChangeHandler.bind(this);
     this._destinationInputChangeHandler = this._destinationInputChangeHandler.bind(this);
@@ -171,6 +174,17 @@ export default class PointEditView extends SmartView {
     this._setInnerHandlers();
     this._setDatepickerStartDate();
     this._setDatepickerEndDate();
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this._datePickerStartDate || this._datePickerEndDate) {
+      this._datePickerStartDate.destroy();
+      this._datePickerEndDate.destroy();
+      this._datePickerStartDate = null;
+      this._datePickerEndDate = null;
+    }
   }
 
   getTemplate() {
@@ -188,11 +202,21 @@ export default class PointEditView extends SmartView {
     this.setRollupBtnClickHandler(this._callback.rollupBtnClick);
     this._setDatepickerStartDate();
     this._setDatepickerEndDate();
+    this.setDeleteClickHandler(this._callback.deleteClick);
+  }
+
+  reset(point) {
+    this.updateData(point);
   }
 
   setRollupBtnClickHandler(callback) {
     this._callback.rollupBtnClick = callback;
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._formDeleteClickHandler);
   }
 
   _setInnerHandlers() {
@@ -255,9 +279,29 @@ export default class PointEditView extends SmartView {
         this.getElement().querySelector(`#event-start-time-1`),
         {
           enableTime: true,
-          dateFormat: `d/m/Y H:i`,
+          time24hr: true,
+          dateFormat: `d/m/y H:i`,
           defaultDate: this._data.startTime,
           onChange: this._startDateChangeHandler
+        }
+    );
+  }
+
+  _setDatepickerEndDate() {
+    if (this._datePickerEndDate) {
+      this._datePickerEndDate.destroy();
+      this._datePickerEndDate = null;
+    }
+
+    this._datePickerEndDate = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        {
+          enableTime: true,
+          time24hr: true,
+          minDate: this._data.startTime,
+          dateFormat: `d/m/y H:i`,
+          defaultDate: this._data.endTime,
+          onChange: this._endDateChangeHandler
         }
     );
   }
@@ -276,24 +320,6 @@ export default class PointEditView extends SmartView {
     }
   }
 
-  _setDatepickerEndDate() {
-    if (this._datePickerEndDate) {
-      this._datePickerEndDate.destroy();
-      this._datePickerEndDate = null;
-    }
-
-    this._datePickerEndDate = flatpickr(
-        this.getElement().querySelector(`#event-end-time-1`),
-        {
-          enableTime: true,
-          minDate: dayjs(this._data.startTime).valueOf(),
-          dateFormat: `d/m/Y H:i`,
-          defaultDate: this._data.endTime,
-          onChange: this._endDateChangeHandler
-        }
-    );
-  }
-
   _endDateChangeHandler(userDate) {
     this.updateData({
       endTime: dayjs(userDate).toDate()
@@ -307,8 +333,13 @@ export default class PointEditView extends SmartView {
     }, true);
   }
 
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(PointEditView.parseDataToPoint(this._data));
+  }
+
   static parsePointToData(pointData) {
-    return Object.assign({}, pointData,{});
+    return Object.assign({}, pointData, {});
   }
 
   static parseDataToPoint(data) {

@@ -2,6 +2,7 @@ import PointView from "../view/point";
 import PointEditView from "../view/point-edit";
 import {render, RenderPosition, replace, remove} from "../utils/render";
 import {destinations} from "../mock/trip-point";
+import {UserActions, UpdateType} from "../utils/const";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -22,6 +23,7 @@ export default class Point {
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
     this._handleEditRollupBtnClick = this._handleEditRollupBtnClick.bind(this);
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
+    this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
@@ -38,6 +40,7 @@ export default class Point {
     this._pointComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._pointEditComponent.setRollupBtnClickHandler(this._handleEditRollupBtnClick);
     this._pointEditComponent.setFormSubmitHandler(this._handleFormSubmit);
+    this._pointEditComponent.setDeleteClickHandler(this._handleDeleteClick);
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
       render(this._tripListContainer, this._pointComponent, RenderPosition.BEFORE_END);
@@ -83,6 +86,7 @@ export default class Point {
   _escKeyDownHandler(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
+      this._pointEditComponent.reset(this._point);
       this._replaceEditToPoint();
     }
   }
@@ -91,22 +95,37 @@ export default class Point {
     this._replacePointToEdit();
   }
 
-  _handleFormSubmit(point) {
-    this._changeData(point);
+  _handleFormSubmit(update) {
+    this._changeData(
+        UserActions.UPDATE_POINT,
+        UpdateType.MINOR,
+        update
+    );
     this._replaceEditToPoint();
   }
 
+  _handleDeleteClick(point) {
+    this._changeData(
+        UserActions.DELETE_POINT,
+        UpdateType.MINOR,
+        point
+    );
+  }
+
   _handleEditRollupBtnClick() {
+    this._pointEditComponent.reset(this._point);
     this._replaceEditToPoint();
   }
 
   _handleFavoriteClick() {
     this._changeData(
+        UserActions.UPDATE_POINT,
+        UpdateType.PATCH,
         Object.assign(
             {},
             this._point,
             {
-              isFavourite: !this._point.isFavourite
+              isFavorite: !this._point.isFavorite
             }
         )
     );
