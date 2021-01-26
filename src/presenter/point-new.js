@@ -1,11 +1,12 @@
 import PointEditView from "../view/point-edit";
 import {nanoid} from "nanoid";
 import {remove, render, RenderPosition} from "../utils/render";
-import {UserActions, UpdateType} from "../utils/const";
+import {UserActions, UpdateType, BLANK_POINT} from "../utils/const";
 
 export default class PointNew {
-  constructor(tripListContainer, changeData) {
+  constructor(tripListContainer, destinations, changeData) {
     this._tripListContainer = tripListContainer;
+    this._destinations = destinations;
     this._changeData = changeData;
 
     this._pointEditComponent = null;
@@ -20,7 +21,7 @@ export default class PointNew {
       return;
     }
 
-    this._pointEditComponent = new PointEditView();
+    this._pointEditComponent = new PointEditView(BLANK_POINT, this._destinations, false);
     this._pointEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._pointEditComponent.setDeleteClickHandler(this._handleDeleteClick);
 

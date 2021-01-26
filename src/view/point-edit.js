@@ -3,6 +3,7 @@ import {EVENT_TYPES, EVENT_DESTINATIONS} from "../mock/const";
 import {getOffersByType} from "../mock/trip-point";
 import SmartView from "./smart";
 import flatpickr from "flatpickr";
+import {nanoid} from "nanoid";
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 // edit = true - for edit point, false - for new point
@@ -153,8 +154,21 @@ const createPointEditTemplate = (pointData, edit) => {
           </li>`;
 };
 
+const BLANK_POINT = {
+  id: nanoid(),
+  date: null,
+  type: EVENT_TYPES[0],
+  description: ``,
+  photos: [],
+  startTime: null,
+  endTime: null,
+  price: 0,
+  isFavorite: false,
+  offers: getOffersByType(EVENT_TYPES[0])
+};
+
 export default class PointEditView extends SmartView {
-  constructor(pointData, destinations, isEdit) {
+  constructor(pointData = BLANK_POINT, destinations, isEdit) {
     super();
     this._data = PointEditView.parsePointToData(pointData);
     this._isEdit = isEdit;
@@ -210,8 +224,12 @@ export default class PointEditView extends SmartView {
   }
 
   setRollupBtnClickHandler(callback) {
-    this._callback.rollupBtnClick = callback;
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
+    if (this._isEdit) {
+      this._callback.rollupBtnClick = callback;
+      this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
+    } else {
+      return;
+    }
   }
 
   setDeleteClickHandler(callback) {
@@ -235,6 +253,10 @@ export default class PointEditView extends SmartView {
     this.getElement()
       .querySelector(`.event__input--price`)
       .addEventListener(`input`, this._priceInputChangeHandler);
+
+    this.getElement()
+      .querySelector(`.event__input--price`)
+      .addEventListener(`focus`, this._priceInputFocusHandler);
   }
 
   _formSubmitHandler(evt) {
@@ -331,6 +353,10 @@ export default class PointEditView extends SmartView {
     this.updateData({
       price: evt.target.value
     }, true);
+  }
+
+  _priceInputFocusHandler(evt) {
+    evt.target.value = ``;
   }
 
   _formDeleteClickHandler(evt) {

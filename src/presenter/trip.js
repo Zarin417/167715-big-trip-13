@@ -7,8 +7,9 @@ import PointPresenter from "./point";
 import PointNewPresenter from "./point-new";
 import {remove, render, RenderPosition} from "../utils/render";
 import {SortType, UpdateType, UserActions, FilterType} from "../utils/const";
-import {sortByPrice, sortByTime} from "../utils/point";
+import {sortByDate, sortByPrice, sortByTime} from "../utils/point";
 import {filter} from "../utils/filter";
+import {destinations} from "../mock/trip-point";
 
 export default class Trip {
   constructor(headerContainer, tripContainer, pointsModel, filterModel) {
@@ -32,7 +33,7 @@ export default class Trip {
     this._pointsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
 
-    this._pointNewPresenter = new PointNewPresenter(this._tripListComponent, this._handleViewAction);
+    this._pointNewPresenter = new PointNewPresenter(this._tripListComponent, destinations, this._handleViewAction);
   }
 
   init() {
@@ -57,7 +58,7 @@ export default class Trip {
         return filteredPoints.sort(sortByPrice);
     }
 
-    return filteredPoints;
+    return filteredPoints.sort(sortByDate);
   }
 
   _handleModeChange() {
@@ -111,7 +112,7 @@ export default class Trip {
     }
 
     this._currentSortType = sortType;
-    this._clearTrip(true);
+    this._clearTrip();
     this._renderTrip();
   }
 
@@ -154,7 +155,7 @@ export default class Trip {
     }
   }
 
-  _clearTrip(resetSortType = false) {
+  _clearTrip() {
     this._pointNewPresenter.destroy();
     this._pointPresenter.forEach((presenter) => presenter.destroy());
     this._pointPresenter = new Map();
@@ -163,9 +164,5 @@ export default class Trip {
     remove(this._tripListComponent);
     remove(this._sortComponent);
     remove(this._emptyTripListComponent);
-
-    if (resetSortType) {
-      this._currentSortType = SortType.DEFAULT;
-    }
   }
 }
