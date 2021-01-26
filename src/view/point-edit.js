@@ -3,6 +3,7 @@ import {EVENT_TYPES, EVENT_DESTINATIONS} from "../mock/const";
 import {getOffersByType} from "../mock/trip-point";
 import SmartView from "./smart";
 import flatpickr from "flatpickr";
+import {nanoid} from "nanoid";
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 // edit = true - for edit point, false - for new point
@@ -49,14 +50,15 @@ const createPointEditTemplate = (pointData, edit) => {
     let eventOffers = ``;
 
     if (offers !== {}) {
-      Object.keys(offers).forEach((key) => {
-        let checked = ``;
+      for (let key in offers) {
+        if (offers) {
+          let checked = ``;
 
-        if (offers[key].checked) {
-          checked = `checked`;
-        }
+          if (offers[key].checked) {
+            checked = `checked`;
+          }
 
-        eventOffers += `<div class="event__offer-selector">
+          eventOffers += `<div class="event__offer-selector">
                           <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offers[key].name}-1" type="checkbox" name="event-offer-${offers[key].name} ${checked}">
                           <label class="event__offer-label" for="event-offer-${offers[key].name}-1">
                             <span class="event__offer-title">${offers[key].description}</span>
@@ -64,7 +66,8 @@ const createPointEditTemplate = (pointData, edit) => {
                             <span class="event__offer-price">${offers[key].price}</span>
                           </label>
                         </div>`;
-      });
+        }
+      }
 
       return `<section class="event__section  event__section--offers">
               <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -136,7 +139,7 @@ const createPointEditTemplate = (pointData, edit) => {
                     <span class="visually-hidden">Price</span>
                     &euro;
                   </label>
-                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+                  <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price}">
                 </div>
 
                 <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -151,8 +154,21 @@ const createPointEditTemplate = (pointData, edit) => {
           </li>`;
 };
 
+const BLANK_POINT = {
+  id: nanoid(),
+  date: null,
+  type: EVENT_TYPES[0],
+  description: ``,
+  photos: [],
+  startTime: null,
+  endTime: null,
+  price: 0,
+  isFavorite: false,
+  offers: getOffersByType(EVENT_TYPES[0])
+};
+
 export default class PointEditView extends SmartView {
-  constructor(pointData, destinations, isEdit) {
+  constructor(pointData = BLANK_POINT, destinations, isEdit) {
     super();
     this._data = PointEditView.parsePointToData(pointData);
     this._isEdit = isEdit;
@@ -160,6 +176,7 @@ export default class PointEditView extends SmartView {
     this._datePickerStartDate = null;
     this._datePickerEndDate = null;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
     this._typeOptionsChangeHandler = this._typeOptionsChangeHandler.bind(this);
     this._destinationInputChangeHandler = this._destinationInputChangeHandler.bind(this);
@@ -173,18 +190,24 @@ export default class PointEditView extends SmartView {
     this._setDatepickerEndDate();
   }
 
-  static parsePointToData(pointData) {
-    return Object.assign(
-        {},
-        pointData,
-        {}
-    );
+  removeElement() {
+    super.removeElement();
+
+    if (this._datePickerStartDate || this._datePickerEndDate) {
+      this._datePickerStartDate.destroy();
+      this._datePickerEndDate.destroy();
+      this._datePickerStartDate = null;
+      this._datePickerEndDate = null;
+    }
   }
 
-  static parseDataToPoint(data) {
-    let pointData = Object.assign({}, data);
+  getTemplate() {
+    return createPointEditTemplate(this._data, this._isEdit);
+  }
 
-    return pointData;
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
   }
 
   restoreHandlers() {
@@ -193,10 +216,25 @@ export default class PointEditView extends SmartView {
     this.setRollupBtnClickHandler(this._callback.rollupBtnClick);
     this._setDatepickerStartDate();
     this._setDatepickerEndDate();
+    this.setDeleteClickHandler(this._callback.deleteClick);
   }
 
-  getTemplate() {
-    return createPointEditTemplate(this._data, this._isEdit);
+  reset(point) {
+    this.updateData(point);
+  }
+
+  setRollupBtnClickHandler(callback) {
+    if (this._isEdit) {
+      this._callback.rollupBtnClick = callback;
+      this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
+    } else {
+      return;
+    }
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._formDeleteClickHandler);
   }
 
   _setInnerHandlers() {
@@ -215,27 +253,20 @@ export default class PointEditView extends SmartView {
     this.getElement()
       .querySelector(`.event__input--price`)
       .addEventListener(`input`, this._priceInputChangeHandler);
-  }
 
+    this.getElement()
+      .querySelector(`.event__input--price`)
+      .addEventListener(`focus`, this._priceInputFocusHandler);
+  }
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
     this._callback.formSubmit(this._data);
   }
 
-  setFormSubmitHandler(callback) {
-    this._callback.formSubmit = callback;
-    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
-  }
-
   _rollupBtnClickHandler(evt) {
     evt.preventDefault();
     this._callback.rollupBtnClick();
-  }
-
-  setRollupBtnClickHandler(callback) {
-    this._callback.rollupBtnClick = callback;
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
   }
 
   _typeOptionsChangeHandler(evt) {
@@ -270,9 +301,29 @@ export default class PointEditView extends SmartView {
         this.getElement().querySelector(`#event-start-time-1`),
         {
           enableTime: true,
-          dateFormat: `d/m/Y H:i`,
+          time24hr: true,
+          dateFormat: `d/m/y H:i`,
           defaultDate: this._data.startTime,
           onChange: this._startDateChangeHandler
+        }
+    );
+  }
+
+  _setDatepickerEndDate() {
+    if (this._datePickerEndDate) {
+      this._datePickerEndDate.destroy();
+      this._datePickerEndDate = null;
+    }
+
+    this._datePickerEndDate = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        {
+          enableTime: true,
+          time24hr: true,
+          minDate: this._data.startTime,
+          dateFormat: `d/m/y H:i`,
+          defaultDate: this._data.endTime,
+          onChange: this._endDateChangeHandler
         }
     );
   }
@@ -291,24 +342,6 @@ export default class PointEditView extends SmartView {
     }
   }
 
-  _setDatepickerEndDate() {
-    if (this._datePickerEndDate) {
-      this._datePickerEndDate.destroy();
-      this._datePickerEndDate = null;
-    }
-
-    this._datePickerEndDate = flatpickr(
-        this.getElement().querySelector(`#event-end-time-1`),
-        {
-          enableTime: true,
-          minDate: dayjs(this._data.startTime).valueOf(),
-          dateFormat: `d/m/Y H:i`,
-          defaultDate: this._data.endTime,
-          onChange: this._endDateChangeHandler
-        }
-    );
-  }
-
   _endDateChangeHandler(userDate) {
     this.updateData({
       endTime: dayjs(userDate).toDate()
@@ -320,5 +353,24 @@ export default class PointEditView extends SmartView {
     this.updateData({
       price: evt.target.value
     }, true);
+  }
+
+  _priceInputFocusHandler(evt) {
+    evt.target.value = ``;
+  }
+
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(PointEditView.parseDataToPoint(this._data));
+  }
+
+  static parsePointToData(pointData) {
+    return Object.assign({}, pointData, {});
+  }
+
+  static parseDataToPoint(data) {
+    let pointData = Object.assign({}, data);
+
+    return pointData;
   }
 }
