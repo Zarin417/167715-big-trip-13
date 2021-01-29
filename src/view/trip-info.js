@@ -1,58 +1,28 @@
-import dayjs from "dayjs";
-import AbstractView from "./abstract";
+import {humanizeDate} from '../utils/point.js';
+import AbstractView from '../view/abstract.js';
 
-const createTripInfoTemplate = (pointsData) => {
+const createTripInfoTemplate = ({dateFrom, dateTo, destinations}) => {
+  if (destinations.length > 3) {
+    destinations.splice(1, destinations.length - 2, `...`);
+  }
 
-  const addTripRout = () => {
-    const destinations = pointsData.map((point) => {
-      return point.destination;
-    });
-
-    let tripRout = [];
-
-    if (destinations.length === 1) {
-      tripRout = [...destinations];
-      return tripRout;
-    } else if (destinations.length === 2) {
-      tripRout = [...destinations];
-      return tripRout.join(` &mdash; `);
-    } else {
-      tripRout.push(destinations[0]);
-      tripRout.push(destinations[destinations.length - 1]);
-      return tripRout.join(` &mdash; ... &mdash; `);
-    }
-  };
-
-  const addTripPeriod = () => {
-    let tripPeriod = ``;
-    const startDay = dayjs(pointsData[0].startTime).format(`MMM DD`);
-    const endDay = dayjs(pointsData[pointsData.length - 1].endTime).format(`MMM DD`);
-
-    if (startDay.slice(0, 4) !== endDay.slice(0, 4)) {
-      tripPeriod = `${startDay} &mdash; ${endDay}`;
-    } else {
-      tripPeriod = `${startDay} &mdash; ${endDay.slice(4)}`;
-    }
-
-    return tripPeriod;
-  };
+  const tripInfoTitle = destinations.join(` &mdash; `);
 
   return `<section class="trip-main__trip-info  trip-info">
             <div class="trip-info__main">
-              <h1 class="trip-info__title">${addTripRout()}</h1>
-
-              <p class="trip-info__dates">${addTripPeriod()}</p>
+              <h1 class="trip-info__title">${tripInfoTitle}</h1>
+              <p class="trip-info__dates">${humanizeDate(dateFrom, `MMM DD`)}&nbsp;&mdash;&nbsp;${humanizeDate(dateTo, `DD`)}</p>
             </div>
           </section>`;
 };
 
-export default class TripInfoView extends AbstractView {
-  constructor(data) {
+export default class TripInfo extends AbstractView {
+  constructor(tripInfo) {
     super();
-    this._pointsData = data;
+    this._tripInfo = tripInfo;
   }
 
   getTemplate() {
-    return createTripInfoTemplate(this._pointsData);
+    return createTripInfoTemplate(this._tripInfo);
   }
 }

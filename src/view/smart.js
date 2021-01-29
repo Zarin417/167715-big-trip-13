@@ -1,23 +1,23 @@
-import AbstractView from "./abstract";
+import Abstract from './abstract.js';
 
-export default class Smart extends AbstractView {
+export default class Smart extends Abstract {
   constructor() {
     super();
-    this._data = {};
+    this._state = {};
   }
 
-  updateData(update, justDataUpdate) {
+  updateData(update, isStateUpdateOnly) {
     if (!update) {
       return;
     }
 
-    this._data = Object.assign(
+    this._state = Object.assign(
         {},
-        this._data,
+        this._state,
         update
     );
 
-    if (justDataUpdate) {
+    if (isStateUpdateOnly) {
       return;
     }
 
@@ -25,7 +25,8 @@ export default class Smart extends AbstractView {
   }
 
   updateElement() {
-    const prevElement = this.getElement();
+    let prevElement = this.getElement();
+
     const parent = prevElement.parentElement;
     this.removeElement();
 
