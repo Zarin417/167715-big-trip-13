@@ -1,33 +1,34 @@
-import PointEditView from "../view/point-edit";
-import {nanoid} from "nanoid";
-import {remove, render, RenderPosition} from "../utils/render";
-import {UserActions, UpdateType, BLANK_POINT} from "../utils/const";
+import PointEditView from '../view/point-edit.js';
+import {remove, render, RenderPosition} from '../utils/render.js';
+import {UpdateType, UserAction} from '../utils/const.js';
+import {isEscEvent} from '../utils/common.js';
+import {nanoid} from 'nanoid';
 
 export default class PointNew {
-  constructor(tripListContainer, destinations, changeData) {
-    this._tripListContainer = tripListContainer;
-    this._destinations = destinations;
+  constructor(pointListContainer, changeData) {
+    this._pointListContainer = pointListContainer;
     this._changeData = changeData;
-
     this._pointEditComponent = null;
 
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
-    this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
+    this._handleEscKeyDown = this._handleEscKeyDown.bind(this);
+    this._handleClickRollupButtonUp = this._handleClickRollupButtonUp.bind(this);
   }
 
-  init() {
+  init(offersModel, destinationsModel) {
     if (this._pointEditComponent !== null) {
       return;
     }
 
-    this._pointEditComponent = new PointEditView(BLANK_POINT, this._destinations, false);
+    this._pointEditComponent = new PointEditView(offersModel.getOffers(), destinationsModel.getDestinations());
     this._pointEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._pointEditComponent.setDeleteClickHandler(this._handleDeleteClick);
+    this._pointEditComponent.setRollupButtonClickHandler(this._handleClickRollupButtonUp);
 
-    render(this._tripListContainer, this._pointEditComponent, RenderPosition.AFTER_BEGIN);
+    render(this._pointListContainer, this._pointEditComponent, RenderPosition.AFTERBEGIN);
 
-    document.addEventListener(`keydown`, this._escKeyDownHandler);
+    document.addEventListener(`keydown`, this._handleEscKeyDown);
   }
 
   destroy() {
@@ -38,12 +39,12 @@ export default class PointNew {
     remove(this._pointEditComponent);
     this._pointEditComponent = null;
 
-    document.removeEventListener(`keydown`, this._escKeyDownHandler);
+    document.removeEventListener(`keydown`, this._handleEscKeyDown);
   }
 
   _handleFormSubmit(point) {
     this._changeData(
-        UserActions.ADD_POINT,
+        UserAction.ADD_POINT,
         UpdateType.MINOR,
         Object.assign({id: nanoid()}, point)
     );
@@ -54,10 +55,13 @@ export default class PointNew {
     this.destroy();
   }
 
-  _escKeyDownHandler(evt) {
-    if (evt.key === `Escape` || evt.key === `Esc`) {
-      evt.preventDefault();
+  _handleEscKeyDown(evt) {
+    isEscEvent(evt, () => {
       this.destroy();
-    }
+    });
+  }
+
+  _handleClickRollupButtonUp() {
+    this.destroy();
   }
 }

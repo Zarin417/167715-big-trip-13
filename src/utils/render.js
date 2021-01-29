@@ -1,9 +1,36 @@
-import AbstractView from "../view/abstract";
+import Abstract from '../view/abstract.js';
 
 export const RenderPosition = {
-  AFTER_BEGIN: `afterbegin`,
-  AFTER_END: `afterend`,
-  BEFORE_END: `beforeend`
+  BEFOREBEGIN: `beforebegin`,
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`,
+  AFTEREND: `afterend`
+};
+
+export const render = (container, child, place) => {
+
+  if (container instanceof Abstract) {
+    container = container.getElement();
+  }
+
+  if (child instanceof Abstract) {
+    child = child.getElement();
+  }
+
+  switch (place) {
+    case RenderPosition.BEFOREBEGIN:
+      container.before(child);
+      break;
+    case RenderPosition.AFTERBEGIN:
+      container.prepend(child);
+      break;
+    case RenderPosition.BEFOREEND:
+      container.append(child);
+      break;
+    case RenderPosition.AFTEREND:
+      container.after(child);
+      break;
+  }
 };
 
 export const createElement = (template) => {
@@ -13,41 +40,19 @@ export const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export const render = (container, child, place) => {
-  if (container instanceof AbstractView) {
-    container = container.getElement();
-  }
-
-  if (child instanceof AbstractView) {
-    child = child.getElement();
-  }
-
-  switch (place) {
-    case RenderPosition.AFTER_BEGIN:
-      container.prepend(child);
-      break;
-    case RenderPosition.BEFORE_END:
-      container.append(child);
-      break;
-    case RenderPosition.AFTER_END:
-      container.after(child);
-      break;
-  }
-};
-
 export const replace = (newChild, oldChild) => {
-  if (oldChild instanceof AbstractView) {
+  if (oldChild instanceof Abstract) {
     oldChild = oldChild.getElement();
   }
 
-  if (newChild instanceof AbstractView) {
+  if (newChild instanceof Abstract) {
     newChild = newChild.getElement();
   }
 
   const parent = oldChild.parentElement;
 
-  if (parent === null || newChild === null) {
-    throw new Error(`Can't replace unexisting elements`);
+  if (parent === null || oldChild === null || newChild === null) {
+    throw new Error(`Can't replace empty elements`);
   }
 
   parent.replaceChild(newChild, oldChild);
@@ -58,7 +63,7 @@ export const remove = (component) => {
     return;
   }
 
-  if (!(component instanceof AbstractView)) {
+  if (!(component instanceof Abstract)) {
     throw new Error(`Can remove only components`);
   }
 

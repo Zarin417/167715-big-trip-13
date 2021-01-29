@@ -8,10 +8,10 @@ export default class Observer {
   }
 
   removeObserver(observer) {
-    this._observers = this._observers.filter((existedObserver) => existedObserver !== observer);
+    this._observers = this._observers.filter((existingObserver) => existingObserver !== observer);
   }
 
-  _notify(event, payload) {
-    this._observers.forEach((observer) => observer(event, payload));
+  _notify(point, payload) {
+    this._observers.forEach((observer) => observer(point, payload));
   }
 }

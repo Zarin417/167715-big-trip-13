@@ -1,88 +1,53 @@
-import dayjs from "dayjs";
-import AbstractView from "./abstract";
+import AbstractView from './abstract.js';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import {pointTypes} from '../utils/const.js';
+import {humanizeDate, formatDuration} from '../utils/point.js';
 
-const MINUTES_IN_HOUR = 60;
-const MINUTES_IN_DAY = 1440;
+dayjs.extend(duration);
 
-const createEventItemTemplate = (data) => {
-  const {date, type, destination, startTime, endTime, price, isFavorite, offers} = data;
+const createPointOfferTemplate = ({title, price}) => {
+  return `<li class="event__offer">
+            <span class="event__offer-title">${title}</span>
+            &plus;&euro;&nbsp;
+            <span class="event__offer-price">${price}</span>
+          </li>`;
+};
 
-  const getEventTimeDuration = () => {
-    const durationInMinutes = dayjs(endTime).diff(dayjs(startTime), `minute`);
-    let durationDays;
-    let durationHours;
-    let durationMinutes;
+const createPointOffersTemplate = (offers) => {
+  return offers.length > 0 ? `<h4 class="visually-hidden">Offers:</h4>
+                              <ul class="event__selected-offers">
+                                ${offers.map((offer) => createPointOfferTemplate(offer)).join(``)}
+                              </ul>` : ``;
+};
 
-    if (durationInMinutes >= MINUTES_IN_DAY) {
-      durationDays = Math.floor(durationInMinutes / MINUTES_IN_DAY);
-      durationHours = Math.floor((durationInMinutes % MINUTES_IN_DAY) / MINUTES_IN_HOUR);
-      durationMinutes = durationInMinutes % MINUTES_IN_HOUR;
-    } else if (durationInMinutes >= MINUTES_IN_HOUR && durationInMinutes < MINUTES_IN_DAY) {
-      durationHours = Math.floor(durationInMinutes / MINUTES_IN_HOUR);
-      durationMinutes = durationInMinutes % MINUTES_IN_HOUR;
-    } else {
-      durationMinutes = durationInMinutes;
-    }
-
-    durationMinutes = (durationMinutes < 10) ? `0${durationMinutes}M` : `${durationMinutes}M`;
-
-    if (durationDays) {
-      durationDays = (durationDays < 10) ? `0${durationDays}D` : `${durationDays}D`;
-      durationHours = (durationHours < 10) ? `0${durationHours}H` : `${durationHours}H`;
-      return `${durationDays} ${durationHours} ${durationMinutes}`;
-    } else if (durationHours) {
-      durationHours = (durationHours < 10) ? `0${durationHours}H` : `${durationHours}H`;
-      return `${durationHours} ${durationMinutes}`;
-    }
-
-    return durationMinutes;
-  };
-
-  const favoriteClassName = isFavorite ? `event__favorite-btn--active` : ``;
-
-  const renderOffers = () => {
-    if (offers !== {}) {
-      let offersItems = ``;
-
-      Object.keys(offers).forEach((key) => {
-        if (offers[key].checked) {
-          offersItems += `<li class="event__offer">
-                           <span class="event__offer-title">${offers[key].description}</span>
-                             &plus;&euro;&nbsp;
-                           <span class="event__offer-price">${offers[key].price}</span>
-                          </li>`;
-        }
-      });
-
-      return `<h4 class="visually-hidden">Offers:</h4>
-              <ul class="event__selected-offers">
-                ${offersItems}
-              </ul>`;
-    }
-
-    return ``;
-  };
+const createPointTemplate = (point) => {
+  const {type, dateFrom, dateTo, destination, price, isFavorite, offers} = point;
+  const offersTemplate = createPointOffersTemplate(offers);
+  const formattedDuration = formatDuration(dateFrom, dateTo);
+  const typeIcon = pointTypes.get(type).src;
+  const favoriteClassName = isFavorite ? `event__favorite-btn event__favorite-btn--active` : `event__favorite-btn`;
 
   return `<li class="trip-events__item">
             <div class="event">
-              <time class="event__date" datetime="${dayjs(date).format(`YYYY-MM-D`)}">${dayjs(date).format(`MMM D`)}</time>
+              <time class="event__date" datetime="${humanizeDate(dateFrom, `YYYY-MM-DD`)}">${humanizeDate(dateFrom, `MMM D`)}</time>
               <div class="event__type">
-                <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
+                <img class="event__type-icon" width="42" height="42" src="${typeIcon}" alt="Event type icon">
               </div>
-              <h3 class="event__title">${type} ${destination}</h3>
+              <h3 class="event__title">${type} ${destination.name}</h3>
               <div class="event__schedule">
                 <p class="event__time">
-                  <time class="event__start-time" datetime="${dayjs(startTime).format(`YYYY-MM-DTh:mm`)}">${dayjs(startTime).format(`h:mm`)}</time>
+                  <time class="event__start-time" datetime="${humanizeDate(dateFrom, `YYYY-MM-DDTHH:mm`)}">${humanizeDate(dateFrom, `HH:mm`)}</time>
                   &mdash;
-                  <time class="event__end-time" datetime="${dayjs(endTime).format(`YYYY-MM-DTh:mm`)}">${dayjs(endTime).format(`h:mm`)}</time>
+                  <time class="event__end-time" datetime="${humanizeDate(dateTo, `YYYY-MM-DDTHH:mm`)}">${humanizeDate(dateTo, `HH:mm`)}</time>
                 </p>
-                <p class="event__duration">${getEventTimeDuration()}</p>
+                <p class="event__duration">${formattedDuration}</p>
               </div>
               <p class="event__price">
                 &euro;&nbsp;<span class="event__price-value">${price}</span>
               </p>
-              ${renderOffers()}
-              <button class="event__favorite-btn ${favoriteClassName}" type="button">
+              ${offersTemplate}
+              <button class="${favoriteClassName}" type="button">
                 <span class="visually-hidden">Add to favorite</span>
                 <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
                   <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
@@ -95,31 +60,34 @@ const createEventItemTemplate = (data) => {
           </li>`;
 };
 
-export default class EventItemView extends AbstractView {
-  constructor(data) {
+export default class Point extends AbstractView {
+  constructor(point) {
     super();
-    this._pointData = data;
-    this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
+    this._point = point;
+
+    this._clickRollupButtonHandler = this._clickRollupButtonHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
   }
 
   getTemplate() {
-    return createEventItemTemplate(this._pointData);
+    return createPointTemplate(this._point);
   }
 
-  setRollupBtnClickHandler(callback) {
-    this._callback.rollupBtnClick = callback;
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
+  setRollupButtonClickHandler(callback) {
+    this._callback.click = callback;
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, this._clickRollupButtonHandler);
   }
 
   setFavoriteClickHandler(callback) {
     this._callback.favoriteClick = callback;
-    this.getElement().querySelector(`.event__favorite-btn`).addEventListener(`click`, this._favoriteClickHandler);
+    this.getElement().querySelector(`.event__favorite-btn`)
+      .addEventListener(`click`, this._favoriteClickHandler);
   }
 
-  _rollupBtnClickHandler(evt) {
+  _clickRollupButtonHandler(evt) {
     evt.preventDefault();
-    this._callback.rollupBtnClick();
+    this._callback.click();
   }
 
   _favoriteClickHandler(evt) {

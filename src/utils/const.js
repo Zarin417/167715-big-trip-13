@@ -1,29 +1,10 @@
-import {nanoid} from "nanoid";
-import {EVENT_TYPES} from "../mock/const";
-import {getOffersByType} from "../mock/trip-point";
-import dayjs from "dayjs";
-
-export const BLANK_POINT = {
-  id: nanoid(),
-  date: dayjs(),
-  type: EVENT_TYPES[0],
-  destination: `Select destination point`,
-  description: ``,
-  photos: [],
-  startTime: dayjs().toDate(),
-  endTime: dayjs().toDate(),
-  price: 0,
-  isFavorite: false,
-  offers: getOffersByType(EVENT_TYPES[0])
-};
-
 export const SortType = {
-  DEFAULT: `day`,
-  TIME: `time`,
-  PRICE: `price`
+  DAY: `sort-day`,
+  TIME: `sort-time`,
+  PRICE: `sort-price`,
 };
 
-export const UserActions = {
+export const UserAction = {
   UPDATE_POINT: `UPDATE_POINT`,
   ADD_POINT: `ADD_POINT`,
   DELETE_POINT: `DELETE_POINT`
@@ -32,7 +13,8 @@ export const UserActions = {
 export const UpdateType = {
   PATCH: `PATCH`,
   MINOR: `MINOR`,
-  MAJOR: `MAJOR`
+  MAJOR: `MAJOR`,
+  INIT: `INIT`
 };
 
 export const FilterType = {
@@ -41,7 +23,77 @@ export const FilterType = {
   PAST: `past`
 };
 
-export const MenuItem = {
-  TABLE: `Table`,
-  STATS: `Stats`
-};
+export const pointTypes = new Map(
+    [
+      [
+        `taxi`,
+        {
+          title: `Taxi`,
+          src: `img/icons/taxi.png`,
+        }
+      ],
+      [
+        `bus`,
+        {
+          title: `Bus`,
+          src: `img/icons/bus.png`,
+        }
+      ],
+      [
+        `train`,
+        {
+          title: `Train`,
+          src: `img/icons/train.png`,
+        }
+      ],
+      [
+        `ship`,
+        {
+          title: `Ship`,
+          src: `img/icons/ship.png`,
+        }
+      ],
+      [
+        `transport`,
+        {
+          title: `Transport`,
+          src: `img/icons/transport.png`,
+        }
+      ],
+      [
+        `drive`,
+        {
+          title: `Drive`,
+          src: `img/icons/drive.png`,
+        }
+      ],
+      [
+        `flight`,
+        {
+          title: `Flight`,
+          src: `img/icons/flight.png`,
+        }
+      ],
+      [
+        `check-in`,
+        {
+          title: `Check-In`,
+          src: `img/icons/check-in.png`,
+        }
+      ],
+      [
+        `sightseeing`,
+        {
+          title: `Sightseeing`,
+          src: `img/icons/sightseeing.png`,
+        }
+      ],
+      [
+        `restaurant`,
+        {
+          title: `Restaurant`,
+          src: `img/icons/restaurant.png`,
+        }
+      ],
+    ]
+);

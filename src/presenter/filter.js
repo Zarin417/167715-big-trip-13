@@ -1,6 +1,6 @@
-import SiteFiltersView from "../view/site-filters";
-import {render, RenderPosition, replace, remove} from "../utils/render";
-import {FilterType, UpdateType} from "../utils/const";
+import SiteFiltersView from '../view/site-filters.js';
+import {remove, render, RenderPosition, replace} from '../utils/render.js';
+import {UpdateType} from '../utils/const.js';
 
 export default class Filter {
   constructor(filterContainer, filterModel) {
@@ -18,14 +18,13 @@ export default class Filter {
   init() {
     this._currentFilter = this._filterModel.getFilter();
 
-    const filters = this._getFilters();
     const prevFilterComponent = this._filterComponent;
 
-    this._filterComponent = new SiteFiltersView(filters, this._currentFilter);
+    this._filterComponent = new SiteFiltersView(this._currentFilter);
     this._filterComponent.setFilterTypeChangeHandler(this._handleFilterTypeChange);
 
     if (prevFilterComponent === null) {
-      render(this._filterContainer, this._filterComponent, RenderPosition.BEFORE_END);
+      render(this._filterContainer, this._filterComponent, RenderPosition.AFTEREND);
       return;
     }
 
@@ -33,33 +32,16 @@ export default class Filter {
     remove(prevFilterComponent);
   }
 
-  _handleModelEvent() {
-    this.init();
-  }
-
   _handleFilterTypeChange(filterType) {
     if (this._currentFilter === filterType) {
       return;
     }
 
-    this._filterModel.setFilter(UpdateType.MAJOR, filterType);
+    this._currentFilter = filterType;
+    this._filterModel.setFilter(UpdateType.MAJOR, this._currentFilter);
   }
 
-  _getFilters() {
-
-    return [
-      {
-        type: FilterType.EVERYTHING,
-        name: `everything`
-      },
-      {
-        type: FilterType.FUTURE,
-        name: `future`
-      },
-      {
-        type: FilterType.PAST,
-        name: `past`
-      }
-    ];
+  _handleModelEvent() {
+    this.init();
   }
 }
