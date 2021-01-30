@@ -25,12 +25,13 @@ export default class Trip {
     this._noPointComponent = new EmptyTripListView();
     this._pointListComponent = new TripListView();
     this._loadingComponent = new LoadingView();
-    this._pointNewPresenter = new PointNewPresenter(this._pointListComponent, this._handleViewAction);
 
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+
+    this._pointNewPresenter = new PointNewPresenter(this._pointListComponent, this._handleViewAction);
   }
 
   init() {
