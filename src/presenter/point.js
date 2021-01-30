@@ -1,5 +1,5 @@
-import PointView from '../view/point.js';
-import PointEditView from '../view/point-edit.js';
+import PointView from "../view/point";
+import PointEditView from "../view/point-edit";
 import {isEscEvent} from '../utils/common.js';
 import {render, RenderPosition, replace, remove} from '../utils/render.js';
 import {UserAction, UpdateType} from '../utils/const.js';
@@ -7,6 +7,12 @@ import {UserAction, UpdateType} from '../utils/const.js';
 const Mode = {
   DEFAULT: `DEFAULT`,
   EDITING: `EDITING`
+};
+
+export const State = {
+  SAVING: `SAVING`,
+  DELETING: `DELETING`,
+  ABORTING: `ABORTING`
 };
 
 export default class Point {
@@ -54,6 +60,7 @@ export default class Point {
 
     if (this._mode === Mode.EDITING) {
       replace(this._pointEditComponent, prevPointEditComponent);
+      this._mode = Mode.DEFAULT;
     }
 
     remove(prevPointComponent);
@@ -66,9 +73,39 @@ export default class Point {
     }
   }
 
+  setViewState(state) {
+    const resetFormState = () => {
+      this._pointEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._pointEditComponent.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case State.DELETING:
+        this._pointEditComponent.updateData({
+          isDisabled: true,
+          isDeleting: true
+        });
+        break;
+      case State.ABORTING:
+        this._pointComponent.shake(resetFormState);
+        this._pointEditComponent.shake(resetFormState);
+        break;
+    }
+  }
+
   destroy() {
     remove(this._pointComponent);
     remove(this._pointEditComponent);
+    document.removeEventListener(`keydown`, this._handleEscKeyDown);
   }
 
   _switchToEdit() {
@@ -105,7 +142,6 @@ export default class Point {
         UpdateType.MINOR,
         point
     );
-    this._switchToDisplay();
   }
 
   _handleFavoriteClick() {
