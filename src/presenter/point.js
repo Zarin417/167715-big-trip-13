@@ -1,6 +1,7 @@
 import PointView from "../view/point";
 import PointEditView from "../view/point-edit";
-import {isEscEvent} from '../utils/common.js';
+import {isEscEvent, isOnline} from '../utils/common.js';
+import {toast} from '../utils/toast/toast.js';
 import {render, RenderPosition, replace, remove} from '../utils/render.js';
 import {UserAction, UpdateType} from '../utils/const.js';
 
@@ -127,6 +128,11 @@ export default class Point {
   }
 
   _handleClickRollupButtonDown() {
+    if (!isOnline()) {
+      toast(`You can't edit while offline`);
+      return;
+    }
+
     this._switchToEdit();
   }
 
@@ -137,6 +143,11 @@ export default class Point {
   }
 
   _handleFormSubmit(point) {
+    if (!isOnline()) {
+      toast(`You can't save while offline`);
+      return;
+    }
+
     this._changeData(
         UserAction.UPDATE_POINT,
         UpdateType.MINOR,
@@ -152,6 +163,11 @@ export default class Point {
   }
 
   _handleDeleteClick(point) {
+    if (!isOnline()) {
+      toast(`You can't delete while offline`);
+      return;
+    }
+
     this._changeData(
         UserAction.DELETE_POINT,
         UpdateType.MINOR,
