@@ -1,5 +1,5 @@
-import PointView from "../view/point";
-import PointEditView from "../view/point-edit";
+import PointView from '../view/point.js';
+import PointEditView from '../view/point-edit.js';
 import {isEscEvent, isOnline} from '../utils/common.js';
 import {toast} from '../utils/toast/toast.js';
 import {render, RenderPosition, replace, remove} from '../utils/render.js';
